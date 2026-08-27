@@ -46,19 +46,21 @@
             <div class="aluno-detalhe" aria-live="polite">
                 <h3 id="aluno-selecionado">Nenhum aluno selecionado</h3>
                 <p id="cpf-selecionado" class="aluno-cpf"></p>
+                <p style="margin-top: 8px;">Frequência: <strong id="frequencia-aluno">100%</strong></p>
             </div>
-
+            
             <div class="tabela-wrapper">
                 <table>
                     <thead>
                         <tr>
-                            <th>Data do atraso</th>
-                            <th>Horário de chegada</th>
+                            <th>Data</th>
+                            <th>Horário</th>
+                            <th>Tipo</th> <!-- Nova Coluna -->
                         </tr>
                     </thead>
                     <tbody id="lista-registros"></tbody>
                 </table>
-                <p id="estado-vazio" class="estado-vazio">Nenhum atraso registrado ainda.</p>
+                <p id="estado-vazio" class="estado-vazio">Nenhum registro encontrado.</p>
             </div>
         </section>
     </main>
