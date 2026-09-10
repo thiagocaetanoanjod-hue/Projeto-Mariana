@@ -1,10 +1,11 @@
 const STORAGE_KEY = "registrosAtrasos";
-const API_URL = "";
+const API_URL = window.APP_CONFIG?.API_URL?.trim() || "";
 
 const form = document.querySelector("#formulario-registro");
 const cpfInput = document.querySelector("#cpf");
 const nomeInput = document.querySelector("#nome");
 const tipoInput = document.querySelector("#tipo-registro");
+const feedbackRegistro = document.querySelector("#feedback-registro");
 
 function getRegistros() {
     try {
@@ -31,18 +32,48 @@ function dataLocal(date) {
 
 async function salvarRegistro(registro) {
     if (API_URL) {
-        const resposta = await fetch(API_URL, {
-            body: JSON.stringify(registro),
-            headers: { "Content-Type": "application/json" },
-            method: "POST"
-        });
+        try {
+            const resposta = await fetch(API_URL, {
+                body: JSON.stringify(registro),
+                headers: { "Content-Type": "application/json" },
+                method: "POST"
+            });
 
-        if (!resposta.ok) throw new Error("Nao foi possivel salvar na API.");
+            if (!resposta.ok) {
+                const erro = new Error("A API recusou o registro.");
+                erro.tipo = "api";
+                throw erro;
+            }
+        } catch (error) {
+            if (error.tipo === "api") throw error;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify([...getRegistros(), registro]));
+            return "cache";
+        }
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify([...getRegistros(), registro]));
+    return "salvo";
 }
 
-// Função de Autocompletar Corrigida
+function validarCpf(cpf) {
+    const digitos = cpf.replace(/\D/g, "");
+    if (digitos.length !== 11 || /^(\d)\1{10}$/.test(digitos)) return false;
+
+    const calcularDigito = (base, pesoInicial) => {
+        const soma = [...base].reduce((total, digito, indice) => total + Number(digito) * (pesoInicial - indice), 0);
+        const resto = (soma * 10) % 11;
+        return resto === 10 ? 0 : resto;
+    };
+
+    return calcularDigito(digitos.slice(0, 9), 10) === Number(digitos[9])
+        && calcularDigito(digitos.slice(0, 10), 11) === Number(digitos[10]);
+}
+
+function exibirFeedback(mensagem, tipo) {
+    feedbackRegistro.textContent = mensagem;
+    feedbackRegistro.className = `feedback feedback--${tipo}`;
+    feedbackRegistro.hidden = false;
+}
+
 function autocompletarAluno(campoOrigem) {
     const registros = getRegistros();
     
@@ -54,8 +85,7 @@ function autocompletarAluno(campoOrigem) {
         }
     } else if (campoOrigem === 'nome') {
         const nomeAtual = nomeInput.value.trim().toLowerCase();
-        // Encontra o último registro com esse nome exato
-        const alunoConhecido = registros.reverse().find(r => r.nome.toLowerCase() === nomeAtual);
+        const alunoConhecido = [...registros].reverse().find(r => r.nome.toLowerCase() === nomeAtual);
         if (alunoConhecido && !cpfInput.value) {
             cpfInput.value = alunoConhecido.cpf; // O CPF já virá formatado do histórico
         }
@@ -79,9 +109,10 @@ form.addEventListener("submit", async (event) => {
     const cpfDigits = cpf.replace(/\D/g, "");
     const tipo = tipoInput.value;
 
-    if (cpfDigits.length !== 11) {
-        cpfInput.setCustomValidity("Digite um CPF válido com 11 números.");
+    if (!validarCpf(cpfDigits)) {
+        cpfInput.setCustomValidity("Digite um CPF válido.");
         cpfInput.reportValidity();
+        exibirFeedback("Verifique o CPF informado e tente novamente.", "erro-validacao");
         return;
     }
     cpfInput.setCustomValidity("");
@@ -96,10 +127,14 @@ form.addEventListener("submit", async (event) => {
     };
 
     try {
-        await salvarRegistro(registro);
+        const resultado = await salvarRegistro(registro);
         form.reset();
-        alert(`${tipo} registrado com sucesso.`);
+        exibirFeedback(resultado === "cache"
+            ? "Sem conexão com a API. O registro foi salvo localmente e deverá ser sincronizado depois."
+            : `${tipo} registrado com sucesso.`, resultado === "cache" ? "erro-rede" : "sucesso");
     } catch (error) {
-        alert("Não foi possível registrar. Tente novamente.");
+        exibirFeedback(error.tipo === "api"
+            ? "O registro foi recusado pela API. Revise os dados e tente novamente."
+            : "Não foi possível registrar. Tente novamente.", error.tipo === "api" ? "erro-validacao" : "erro-rede");
     }
 });

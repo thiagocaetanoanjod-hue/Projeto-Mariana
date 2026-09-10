@@ -18,7 +18,7 @@
                 <div>
                     <p class="eyebrow">Área administrativa</p>
                     <h2>Registros armazenados</h2>
-                    <p class="relatorio-ajuda">Consulte os atrasos salvos neste dispositivo.</p>
+                    <p class="relatorio-ajuda">Consulte os registros do período selecionado.</p>
                 </div>
                 <button type="button" id="btn-imprimir" class="btn-submit">Gerar relatório</button>
             </div>
@@ -39,6 +39,10 @@
             </div>
 
             <div class="filtro-aluno">
+                <div class="input-group filtro-periodo">
+                    <label for="seletor-periodo">Período:</label>
+                    <input type="month" id="seletor-periodo" name="periodo">
+                </div>
                 <label for="seletor-aluno">Visualizar aluno:</label>
                 <select id="seletor-aluno" class="seletor-aluno"></select>
             </div>
@@ -46,7 +50,7 @@
             <div class="aluno-detalhe" aria-live="polite">
                 <h3 id="aluno-selecionado">Nenhum aluno selecionado</h3>
                 <p id="cpf-selecionado" class="aluno-cpf"></p>
-                <p style="margin-top: 8px;">Frequência: <strong id="frequencia-aluno">100%</strong></p>
+                <p class="frequencia">Frequência: <strong id="frequencia-aluno">100%</strong></p>
             </div>
             
             <div class="tabela-wrapper">
@@ -68,6 +72,7 @@
     <footer>
         <p>&copy; 2026 Senai. Todos os direitos reservados.</p>
     </footer>
+    <script src="config.js"></script>
     <script src="relatorio.js"></script>
 </body>
 </html>
