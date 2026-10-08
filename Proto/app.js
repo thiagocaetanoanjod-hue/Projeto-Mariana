@@ -1,140 +1,123 @@
 const STORAGE_KEY = "registrosAtrasos";
+
+const totalRegistros = document.querySelector("#total-registros");
+const registrosHoje = document.querySelector("#registros-hoje");
+const percentualHoje = document.querySelector("#percentual-hoje");
+const listaRegistros = document.querySelector("#lista-registros");
+const estadoVazio = document.querySelector("#estado-vazio");
+const seletorAluno = document.querySelector("#seletor-aluno");
+const alunoSelecionado = document.querySelector("#aluno-selecionado");
+const cpfSelecionado = document.querySelector("#cpf-selecionado");
+const frequenciaAluno = document.querySelector("#frequencia-aluno");
+const seletorPeriodo = document.querySelector("#seletor-periodo");
 const API_URL = window.APP_CONFIG?.API_URL?.trim() || "";
+const PERDA_POR_REGISTRO = 2;
 
-const form = document.querySelector("#formulario-registro");
-const cpfInput = document.querySelector("#cpf");
-const nomeInput = document.querySelector("#nome");
-const tipoInput = document.querySelector("#tipo-registro");
-const feedbackRegistro = document.querySelector("#feedback-registro");
+function carregarRegistros() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } 
+    catch (error) { return []; }
+}
 
-function getRegistros() {
+async function obterRegistros() {
+    if (!API_URL) return carregarRegistros();
+
     try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        const resposta = await fetch(API_URL);
+        if (!resposta.ok) throw new Error("Não foi possível carregar os registros da API.");
+        const registros = await resposta.json();
+        if (!Array.isArray(registros)) throw new Error("Resposta inválida da API.");
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(registros));
+        return registros;
     } catch (error) {
-        return [];
+        return carregarRegistros();
     }
 }
 
-function formatarCpf(value) {
-    const digits = value.replace(/\D/g, "").slice(0, 11);
-    return digits
-        .replace(/(\d{3})(\d)/, "$1.$2")
-        .replace(/(\d{3})(\d)/, "$1.$2")
-        .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+function escaparHtml(value) {
+    return String(value).replace(/[&<>"']/g, (character) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+    }[character]));
 }
 
-function dataLocal(date) {
-    const ano = date.getFullYear();
-    const mes = String(date.getMonth() + 1).padStart(2, "0");
-    const dia = String(date.getDate()).padStart(2, "0");
-    return `${ano}-${mes}-${dia}`;
+function dataAtual() {
+    const hoje = new Date();
+    return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}-${String(hoje.getDate()).padStart(2, "0")}`;
 }
 
-async function salvarRegistro(registro) {
-    if (API_URL) {
-        try {
-            const resposta = await fetch(API_URL, {
-                body: JSON.stringify(registro),
-                headers: { "Content-Type": "application/json" },
-                method: "POST"
-            });
-
-            if (!resposta.ok) {
-                const erro = new Error("A API recusou o registro.");
-                erro.tipo = "api";
-                throw erro;
-            }
-        } catch (error) {
-            if (error.tipo === "api") throw error;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify([...getRegistros(), registro]));
-            return "cache";
-        }
-    }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([...getRegistros(), registro]));
-    return "salvo";
+function formatarData(data) {
+    const [ano, mes, dia] = data.split("-");
+    return `${dia}/${mes}/${ano}`;
 }
 
-function validarCpf(cpf) {
-    const digitos = cpf.replace(/\D/g, "");
-    if (digitos.length !== 11 || /^(\d)\1{10}$/.test(digitos)) return false;
-
-    const calcularDigito = (base, pesoInicial) => {
-        const soma = [...base].reduce((total, digito, indice) => total + Number(digito) * (pesoInicial - indice), 0);
-        const resto = (soma * 10) % 11;
-        return resto === 10 ? 0 : resto;
-    };
-
-    return calcularDigito(digitos.slice(0, 9), 10) === Number(digitos[9])
-        && calcularDigito(digitos.slice(0, 10), 11) === Number(digitos[10]);
-}
-
-function exibirFeedback(mensagem, tipo) {
-    feedbackRegistro.textContent = mensagem;
-    feedbackRegistro.className = `feedback feedback--${tipo}`;
-    feedbackRegistro.hidden = false;
-}
-
-function autocompletarAluno(campoOrigem) {
-    const registros = getRegistros();
+async function atualizarRelatorio() {
+    const registros = await obterRegistros();
+    const periodo = seletorPeriodo.value;
+    const registrosDoPeriodo = periodo
+        ? registros.filter((registro) => registro.data?.startsWith(periodo))
+        : registros;
     
-    if (campoOrigem === 'cpf') {
-        const cpfAtual = cpfInput.value;
-        const alunoConhecido = registros.find(r => r.cpf === cpfAtual);
-        if (alunoConhecido && !nomeInput.value) {
-            nomeInput.value = alunoConhecido.nome;
-        }
-    } else if (campoOrigem === 'nome') {
-        const nomeAtual = nomeInput.value.trim().toLowerCase();
-        const alunoConhecido = [...registros].reverse().find(r => r.nome.toLowerCase() === nomeAtual);
-        if (alunoConhecido && !cpfInput.value) {
-            cpfInput.value = alunoConhecido.cpf; // O CPF já virá formatado do histórico
-        }
+    // --- Lógica Geral do Relatório Restaurada ---
+    const hoje = registrosDoPeriodo.filter((registro) => registro.data === dataAtual()).length;
+    const percentual = registrosDoPeriodo.length ? Math.round((hoje / registrosDoPeriodo.length) * 100) : 0;
+
+    totalRegistros.textContent = registrosDoPeriodo.length;
+    registrosHoje.textContent = hoje;
+    percentualHoje.textContent = `${percentual}%`;
+
+    const alunos = [...new Map(registrosDoPeriodo.map((registro) => [registro.cpf, {
+        cpf: registro.cpf,
+        nome: registro.nome
+    }])).values()];
+    const alunoAtual = seletorAluno.value || alunos[0]?.cpf || "";
+
+    seletorAluno.innerHTML = alunos.length
+        ? alunos.map((a) => `<option value="${escaparHtml(a.cpf)}">${escaparHtml(a.nome)} - ${escaparHtml(a.cpf)}</option>`).join("")
+        : `<option value="">Nenhum aluno registrado</option>`;
+    seletorAluno.value = alunos.some((a) => a.cpf === alunoAtual) ? alunoAtual : alunos[0]?.cpf || "";
+
+    const aluno = alunos.find((item) => item.cpf === seletorAluno.value);
+    const registrosDoAluno = registrosDoPeriodo.filter((registro) => registro.cpf === seletorAluno.value);
+    // ---------------------------------------------
+
+    // --- LÓGICA DE FREQUÊNCIA ---
+    const totalRegistrosAluno = registrosDoAluno.length;
+    const porcentagemAtual = Math.max(0, 100 - (totalRegistrosAluno * PERDA_POR_REGISTRO));
+    
+    if (aluno && frequenciaAluno) {
+        frequenciaAluno.textContent = `${porcentagemAtual}%`;
+        frequenciaAluno.classList.toggle("frequencia--alerta", totalRegistrosAluno >= 3);
+    } else if (frequenciaAluno) {
+        frequenciaAluno.textContent = "100%";
+        frequenciaAluno.classList.remove("frequencia--alerta");
     }
+    // ----------------------------
+
+    alunoSelecionado.textContent = aluno?.nome || "Nenhum aluno selecionado";
+    cpfSelecionado.textContent = aluno?.cpf || "Registre um aluno para consultar o histórico.";
+    listaRegistros.innerHTML = "";
+    
+    if(estadoVazio) estadoVazio.hidden = registrosDoAluno.length > 0;
+
+    [...registrosDoAluno].reverse().forEach((registro) => {
+        const linha = document.createElement("tr");
+        linha.innerHTML = `
+            <td>${formatarData(registro.data)}</td>
+            <td>${escaparHtml(registro.horario)}</td>
+            <td>${escaparHtml(registro.tipo || "Atraso")}</td>
+        `;
+        listaRegistros.appendChild(linha);
+    });
 }
 
-nomeInput.addEventListener("blur", () => autocompletarAluno('nome'));
+seletorAluno.addEventListener("change", atualizarRelatorio);
+seletorPeriodo.addEventListener("change", atualizarRelatorio);
 
-cpfInput.addEventListener("input", (event) => {
-    event.target.value = formatarCpf(event.target.value);
-    if (event.target.value.length === 14) {
-        autocompletarAluno('cpf');
-    }
-});
-
-form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-
-    const nome = nomeInput.value.trim();
-    const cpf = cpfInput.value.trim();
-    const cpfDigits = cpf.replace(/\D/g, "");
-    const tipo = tipoInput.value;
-
-    if (!validarCpf(cpfDigits)) {
-        cpfInput.setCustomValidity("Digite um CPF válido.");
-        cpfInput.reportValidity();
-        exibirFeedback("Verifique o CPF informado e tente novamente.", "erro-validacao");
-        return;
-    }
-    cpfInput.setCustomValidity("");
-
-    const agora = new Date();
-    const registro = {
-        nome,
-        cpf,
-        tipo, 
-        data: dataLocal(agora),
-        horario: agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
-    };
-
-    try {
-        const resultado = await salvarRegistro(registro);
-        form.reset();
-        exibirFeedback(resultado === "cache"
-            ? "Sem conexão com a API. O registro foi salvo localmente e deverá ser sincronizado depois."
-            : `${tipo} registrado com sucesso.`, resultado === "cache" ? "erro-rede" : "sucesso");
-    } catch (error) {
-        exibirFeedback(error.tipo === "api"
-            ? "O registro foi recusado pela API. Revise os dados e tente novamente."
-            : "Não foi possível registrar. Tente novamente.", error.tipo === "api" ? "erro-validacao" : "erro-rede");
-    }
-});
+const btnImprimir = document.querySelector("#btn-imprimir");
+if (btnImprimir) {
+    btnImprimir.addEventListener("click", async () => {
+        await atualizarRelatorio();
+        window.print();
+    });
+}
+seletorPeriodo.value = dataAtual().slice(0, 7);
+atualizarRelatorio();
