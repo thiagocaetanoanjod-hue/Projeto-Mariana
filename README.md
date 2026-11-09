@@ -29,9 +29,9 @@
 
 ## 📌 Sobre o Projeto
 
-O **MarianaSRA** foi concebido no âmbito do **SENAI** para modernizar o atendimento no setor de Qualidade de Vida escolar, eliminando os gargalos do registro manual em papel e prevenindo perdas de tempo nas aulas[cite: 5].
+O **MarianaSRA** foi concebido no âmbito do **SENAI** para modernizar o atendimento no setor de Qualidade de Vida escolar, eliminando os gargalos do registro manual em papel e prevenindo perdas de tempo nas aulas.
 
-O grande diferencial da aplicação é a sua **autonomia por voz para alunos com deficiência visual ou baixa visão**, integrando o programa **Incluir para Evoluir**[cite: 10]. O sistema evoluiu do modelo tradicional por teclado para uma **interação 100% por microfone (Speech-to-Text)**, permitindo que o aluno dite suas informações e veja o formulário ser preenchido automaticamente pela aplicação.
+O grande diferencial da aplicação é a sua **autonomia por voz para alunos com deficiência visual ou baixa visão**, integrando o programa **Incluir para Evoluir**. O sistema evoluiu do modelo tradicional por teclado para uma **interação 100% por microfone (Speech-to-Text)**, permitindo que o aluno dite suas informações e veja o formulário ser preenchido automaticamente pela aplicação.
 
 ---
 
@@ -51,12 +51,12 @@ O sistema adota estritamente os padrões visuais da marca SENAI na sua interface
 ## ✨ Funcionalidades Principais
 
 - 🎙️ **Entrada por Microfone (Speech-to-Text):** O aluno fala diretamente no microfone seu **Nome**, **CPF** e **Tipo de Atraso**, e o sistema reconhece os dados preenchendo os campos automaticamente.
-- 🔊 **Áudio-Guia Integrado (Text-to-Speech):** A cada passo, a *Web Speech API* orienta o estudante e confirma os dados ditados com leitura audível[cite: 10].
+- 🔊 **Áudio-Guia Integrado (Text-to-Speech):** A cada passo, a *Web Speech API* orienta o estudante e confirma os dados ditados com leitura audível.
 - ⚡ **Autocompletar Inteligente:** Preenchimento assistido a partir do reconhecimento de voz e histórico/cadastro do aluno.
 - 🆔 **Validação e Formatação de CPF:** Tratamento automático dos números ditados para cálculo de dígitos verificadores e formatação dinâmica (`000.000.000-00`).
 - ⏱️ **Registro Rápido:** Marcações instantâneas para **Atraso** e **Saída Adiantada**.
-- 📊 **Painel de Relatórios:** Consulta de acessos para acompanhamento da equipe de gestão escolar[cite: 6].
-- 🛡️ **Fallback Local (Offline-first):** Suporte a cache local no navegador (`localStorage`) em caso de oscilação de rede[cite: 9].
+- 📊 **Painel de Relatórios:** Consulta de acessos para acompanhamento da equipe de gestão escolar.
+- 🛡️ **Fallback Local (Offline-first):** Suporte a cache local no navegador (`localStorage`) em caso de oscilação de rede.
 
 ---
 
@@ -64,11 +64,11 @@ O sistema adota estritamente os padrões visuais da marca SENAI na sua interface
 
 | Camada | Tecnologias Utilizadas |
 | :--- | :--- |
-| **Frontend** | HTML5 Semântico, CSS3 (Estilo SENAI), JavaScript Vanilla[cite: 9, 10] |
-| **Acessibilidade por Voz** | Web Speech API (`SpeechRecognition` e `SpeechSynthesis`)[cite: 10] |
-| **Backend** | Java (JDK 17/24), Spring Boot, Spring Data JPA, Hibernate, Tomcat (`8080`)[cite: 9] |
-| **Banco de Dados** | MySQL Server 8.0+[cite: 9] |
-| **Arquitetura** | REST API (JSON)[cite: 9] |
+| **Frontend** | HTML5 Semântico, CSS3 (Estilo SENAI), JavaScript Vanilla |
+| **Acessibilidade por Voz** | Web Speech API (`SpeechRecognition` e `SpeechSynthesis`) |
+| **Backend** | Java (JDK 17/24), Spring Boot, Spring Data JPA, Hibernate, Tomcat (`8080`) |
+| **Banco de Dados** | MySQL Server 8.0+ |
+| **Arquitetura** | REST API (JSON) |
 
 ---
 
