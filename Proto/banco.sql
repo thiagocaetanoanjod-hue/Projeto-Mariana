@@ -20,13 +20,13 @@ CREATE TABLE turmas (
     curso         VARCHAR(150) NOT NULL,
     codigo_turma  VARCHAR(50)  NOT NULL,
     criado_em     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY uk_turmas_codigo (codigo_turma)
+    UNIQUE KEY uk_turmas_identidade (tipo_curso, curso, codigo_turma)
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
 -- Tabela: alunos
--- Nº de Matrícula, Nome e CPF vêm vazios na planilha — são preenchidos
--- pelo sistema a cada novo aluno registrado (manual ou por voz).
+-- Nº de Matrícula, Nome e CPF são importados da planilha modelo e
+-- relacionados automaticamente à respectiva turma.
 -- CPF é guardado só com dígitos (11 chars); formatação (000.000.000-00)
 -- fica por conta da camada de apresentação, evitando duplicidade por
 -- diferença de máscara.
@@ -40,6 +40,7 @@ CREATE TABLE alunos (
     criado_em   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uk_alunos_matricula (matricula),
     UNIQUE KEY uk_alunos_cpf (cpf),
+    INDEX idx_alunos_nome (nome),
     CONSTRAINT fk_alunos_turma FOREIGN KEY (turma_id) REFERENCES turmas(id)
 ) ENGINE=InnoDB;
 
