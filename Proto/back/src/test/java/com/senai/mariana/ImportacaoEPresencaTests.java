@@ -102,4 +102,43 @@ class ImportacaoEPresencaTests {
         assertEquals("12", respostaGet.getBody().get(0).get("turma"));
         assertNull(respostaGet.getBody().get(0).get("cpf"));
     }
+
+    @Test
+    void devePreservarZeroAEsquerdaEmCpfNumericoNaImportacao() throws Exception {
+        byte[] xlsxBytes;
+        try (XSSFWorkbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            Sheet sheet = workbook.createSheet("Table");
+            Row header = sheet.createRow(0);
+            header.createCell(0).setCellValue("Nº de Matrícula");
+            header.createCell(1).setCellValue("Nome");
+            header.createCell(2).setCellValue("CPF");
+            header.createCell(3).setCellValue("Tipo de Curso");
+            header.createCell(4).setCellValue("Curso");
+            header.createCell(5).setCellValue("Turma");
+
+            Row row = sheet.createRow(1);
+            row.createCell(0).setCellValue("0000000002");
+            row.createCell(1).setCellValue("Maria Oliveira");
+            row.createCell(2).setCellValue(1234567890d); // Simula 01234567890 salvo como número
+            row.createCell(3).setCellValue("Técnico");
+            row.createCell(4).setCellValue("Análise e Desenvolvimento de Sistemas");
+            row.createCell(5).setCellValue("12");
+
+            workbook.write(out);
+            xlsxBytes = out.toByteArray();
+        }
+
+        MockMultipartFile arquivo = new MockMultipartFile(
+                "file",
+                "teste-zero.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                xlsxBytes
+        );
+
+        Map<String, Object> resumo = importacaoPlanilhaService.importar(arquivo);
+        assertEquals("sucesso", resumo.get("status"));
+        assertEquals(1, resumo.get("inseridos"));
+        assertTrue(((List<?>) resumo.get("erros")).isEmpty());
+        assertTrue(alunoRepository.findByCpf("01234567890").isPresent());
+    }
 }

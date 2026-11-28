@@ -75,7 +75,7 @@ public class ImportacaoPlanilhaService {
             }
 
             linhasLidas++;
-            String cpf = cpfRaw.replaceAll("\\D", "");
+            String cpf = normalizarCpf(cpfRaw);
 
             String erroValidacao = validarLinha(matricula, nome, cpf, tipoCurso, curso, codigoTurma);
             if (erroValidacao != null) {
@@ -271,6 +271,15 @@ public class ImportacaoPlanilhaService {
         if (curso.isEmpty()) return "Curso vazio.";
         if (codigoTurma.isEmpty()) return "Turma vazia.";
         return null;
+    }
+
+    private String normalizarCpf(String cpfRaw) {
+        String digits = cpfRaw.replaceAll("\\D", "");
+        // Planilhas numéricas do Excel/Sheets removem zeros à esquerda de CPFs iniciados em 0.
+        if (digits.length() >= 8 && digits.length() < 11) {
+            return String.format("%11s", digits).replace(' ', '0');
+        }
+        return digits;
     }
 
     private String valorColuna(List<String> linha, Integer indice) {

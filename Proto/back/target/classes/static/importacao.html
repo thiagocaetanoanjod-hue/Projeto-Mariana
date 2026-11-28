@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Importação de Alunos</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Importação de Alunos</h1>
+        <nav class="admin-nav" aria-label="Navegação administrativa" data-admin-nav></nav>
+    </header>
+
+    <main class="container relatorio-container">
+        <section class="relatorio-card">
+            <div class="relatorio-topo">
+                <div>
+                    <p class="eyebrow">Área administrativa</p>
+                    <h2>Importar planilha de alunos</h2>
+                    <p class="relatorio-ajuda">Envie um arquivo .xlsx, .xls ou .csv com as colunas: Nº de Matrícula, Nome, CPF, Tipo de Curso, Curso e Turma.</p>
+                </div>
+            </div>
+
+            <form id="form-importacao" class="importacao-form">
+                <div class="input-group">
+                    <label for="arquivo-planilha">Planilha de alunos:</label>
+                    <input type="file" id="arquivo-planilha" name="file" accept=".xlsx,.xls,.csv" required>
+                </div>
+
+                <div class="importacao-acoes">
+                    <button type="submit" id="btn-importar" class="btn-submit">Importar Planilha</button>
+                </div>
+
+                <div id="feedback-importacao" class="feedback" role="status" aria-live="polite" hidden></div>
+            </form>
+
+            <div id="resumo-importacao" class="resumo resumo--quatro" aria-live="polite" hidden>
+                <div class="resumo-item">
+                    <strong id="resumo-linhas">0</strong>
+                    <span>Linhas lidas</span>
+                </div>
+                <div class="resumo-item">
+                    <strong id="resumo-inseridos">0</strong>
+                    <span>Alunos inseridos</span>
+                </div>
+                <div class="resumo-item">
+                    <strong id="resumo-atualizados">0</strong>
+                    <span>Alunos atualizados</span>
+                </div>
+                <div class="resumo-item">
+                    <strong id="resumo-turmas">0</strong>
+                    <span>Turmas criadas</span>
+                </div>
+            </div>
+
+            <div id="box-erros-importacao" class="importacao-erros" hidden>
+                <h3>Linhas com pendência na planilha</h3>
+                <ul id="lista-erros-importacao"></ul>
+            </div>
+
+            <div class="filtro-aluno filtro-alunos-barra">
+                <div class="input-group">
+                    <label for="filtro-busca">Buscar aluno:</label>
+                    <input type="search" id="filtro-busca" placeholder="Nome ou matrícula">
+                </div>
+                <div class="input-group">
+                    <label for="filtro-turma">Turma:</label>
+                    <select id="filtro-turma" class="seletor-aluno">
+                        <option value="">Todas as turmas</option>
+                    </select>
+                </div>
+                <span id="total-alunos-exibidos" class="total-alunos">0 alunos</span>
+            </div>
+
+            <div class="tabela-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Matrícula</th>
+                            <th>Nome</th>
+                            <th>Turma</th>
+                            <th>Curso</th>
+                            <th>Tipo de Curso</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-alunos"></tbody>
+                </table>
+                <p id="estado-vazio-alunos" class="estado-vazio">Nenhum aluno cadastrado até o momento.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Senai. Todos os direitos reservados.</p>
+    </footer>
+    <script src="config.js"></script>
+    <script src="nav-admin.js"></script>
+    <script src="importacao.js"></script>
+</body>
+</html>

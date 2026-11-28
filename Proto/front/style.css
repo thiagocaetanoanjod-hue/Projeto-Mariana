@@ -44,6 +44,13 @@ header h1 {
     letter-spacing: 0.01em;
 }
 
+.admin-nav {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
 .link-admin {
     border: 1px solid rgba(255, 255, 255, 0.8);
     color: var(--surface);
@@ -54,7 +61,8 @@ header h1 {
 }
 
 .link-admin:hover,
-.link-admin:focus-visible {
+.link-admin:focus-visible,
+.link-admin--ativo {
     background: var(--surface);
     color: var(--senai-red);
 }
@@ -138,6 +146,11 @@ header h1 {
 .btn-submit:hover,
 .btn-submit:focus-visible {
     background: var(--senai-red-dark);
+}
+
+.btn-submit:disabled {
+    cursor: wait;
+    opacity: 0.7;
 }
 
 footer {
@@ -310,7 +323,65 @@ tbody tr:nth-child(even) {
     color: var(--senai-red);
 }
 
+.importacao-form {
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 24px 0 28px;
+    padding-bottom: 28px;
+}
+
+.importacao-acoes {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.importacao-erros {
+    background: var(--surface-soft);
+    border-left: 4px solid var(--senai-red);
+    margin-bottom: 24px;
+    padding: 16px 20px;
+}
+
+.importacao-erros h3 {
+    color: var(--senai-red-dark);
+    font-size: 1rem;
+    margin-bottom: 10px;
+}
+
+.importacao-erros ul {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    list-style: disc;
+    padding-left: 20px;
+}
+
+.filtro-alunos-barra {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+.filtro-alunos-barra .input-group {
+    flex: 1 1 240px;
+}
+
+.total-alunos {
+    color: var(--senai-blue);
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin-left: auto;
+}
+
+.resumo--quatro {
+    grid-template-columns: repeat(4, 1fr);
+}
+
 @media print {
+    .admin-nav,
     header,
     footer,
     .btn-submit,
@@ -358,7 +429,8 @@ tbody tr:nth-child(even) {
         flex-direction: column;
     }
 
-    .resumo {
+    .resumo,
+    .resumo--quatro {
         grid-template-columns: 1fr;
         margin: 24px 0;
     }
